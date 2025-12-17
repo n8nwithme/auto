@@ -6,23 +6,39 @@
 #  Author: vnROM - AI & Automation
 # ==============================================================================
 
-# === Colors ===
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+# Định nghĩa URL chính gốc của script để tự tải lại khi cần
+# Bạn hãy thay đường dẫn dưới đây bằng link RAW Github chuẩn của bạn
+SCRIPT_URL="https://raw.githubusercontent.com/vnrom/n8n-installer/main/n8n.sh"
 
-# === 1. ROOT PERMISSION CHECK (Fix theo yêu cầu) ===
+# === 0. BOOTSTRAP & ROOT CHECK (Xử lý lỗi Pipe & Quyền Root) ===
+
+# Kiểm tra nếu đang chạy qua Pipe (curl | bash) thì input (fd 0) sẽ không phải terminal
+if [ ! -t 0 ]; then
+    echo ">>> Phát hiện chạy qua Pipe. Đang tải script về /tmp để chạy tương tác..."
+    
+    # Cài curl nếu chưa có
+    if ! command -v curl &> /dev/null; then
+        if command -v apt-get &> /dev/null; then
+            apt-get update && apt-get install -y curl
+        elif command -v yum &> /dev/null; then
+            yum install -y curl
+        fi
+    fi
+
+    # Tải script về file tạm
+    curl -fsSL "$SCRIPT_URL" -o /tmp/n8n_setup.sh
+    chmod +x /tmp/n8n_setup.sh
+
+    # Chạy lại script từ file tạm, ép buộc dùng sudo và kết nối bàn phím (/dev/tty)
+    echo ">>> Đang chuyển quyền Root và khởi chạy giao diện..."
+    exec sudo /tmp/n8n_setup.sh "$@" < /dev/tty
+    exit
+fi
+
+# Kiểm tra quyền Root (Lớp bảo vệ thứ 2 nếu chạy trực tiếp file)
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}⚠️  LỖI: Script cần quyền Root để cài đặt Docker và cấu hình hệ thống!${NC}"
-    echo ""
-    echo -e "${YELLOW}👉 Vui lòng chạy lệnh sau để chuyển sang quyền Root:${NC}"
-    echo -e "   sudo su"
-    echo ""
-    echo -e "${YELLOW}👉 Sau đó chạy lại lệnh cài đặt:${NC}"
-    echo -e "   curl -fsSL https://vnrom.me/n8n | sudo bash"
-    echo ""
+    echo "⚠️  LỖI: Script cần quyền Root để cài đặt Docker!"
+    echo "👉 Vui lòng chạy: sudo ./n8n.sh"
     exit 1
 fi
 
@@ -41,6 +57,13 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Config file
 CONFIG_FILE="$HOME/.n8n_install_config"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
 # Fail on error
 set -e
@@ -117,8 +140,8 @@ get_cloudflare_input() {
     
     if load_config; then
         echo "Tìm thấy cấu hình cũ: $CF_HOSTNAME"
-        # FIX: Thêm < /dev/tty để đọc từ bàn phím khi chạy qua pipe
-        read -p "Bạn có muốn dùng lại Token cũ không? (Y/n): " reuse < /dev/tty
+        # Đã bỏ < /dev/tty vì đã xử lý ở Bootstrap
+        read -p "Bạn có muốn dùng lại Token cũ không? (Y/n): " reuse
         if [[ "$reuse" != "n" && "$reuse" != "N" ]]; then
             return 0
         fi
@@ -126,14 +149,12 @@ get_cloudflare_input() {
 
     echo "Truy cập https://one.dash.cloudflare.com > Access > Tunnels để lấy Token."
     while true; do
-        # FIX: Thêm < /dev/tty
-        read -p "Nhập Cloudflare Tunnel Token: " CF_TOKEN < /dev/tty
+        read -p "Nhập Cloudflare Tunnel Token: " CF_TOKEN
         if [[ "$CF_TOKEN" =~ ^eyJ ]]; then break; else print_warning "Token không hợp lệ (phải bắt đầu bằng eyJ)"; fi
     done
     
     while true; do
-        # FIX: Thêm < /dev/tty
-        read -p "Nhập Hostname (vd: n8n.vnrom.net): " CF_HOSTNAME < /dev/tty
+        read -p "Nhập Hostname (vd: n8n.vnrom.net): " CF_HOSTNAME
         if [[ "$CF_HOSTNAME" =~ \. ]]; then break; else print_warning "Hostname không hợp lệ"; fi
     done
 }
@@ -339,8 +360,7 @@ install_n8n() {
     echo "4. Nâng cao (Postgres + Redis - Ổn định cao)"
     echo "5. Scaling (Postgres + Redis + Worker - Tải nặng)"
     echo ""
-    # FIX: Thêm < /dev/tty
-    read -p "Nhập lựa chọn (1-5): " choice < /dev/tty
+    read -p "Nhập lựa chọn (1-5): " choice
     
     local type="basic"
     case $choice in
@@ -461,8 +481,7 @@ show_menu() {
     echo "4. 📊 Kiểm tra trạng thái"
     echo "0. ❌ Thoát"
     echo ""
-    # FIX: Thêm < /dev/tty
-    read -p "Nhập lựa chọn: " choice < /dev/tty
+    read -p "Nhập lựa chọn: " choice
     case $choice in
         1) install_n8n ;;
         2) backup_n8n ;;
@@ -486,7 +505,6 @@ else
     while true; do
         show_menu
         echo ""
-        # FIX: Thêm < /dev/tty để dừng màn hình chờ enter
-        read -p "Nhấn Enter để tiếp tục..." < /dev/tty
+        read -p "Nhấn Enter để tiếp tục..."
     done
 fi
