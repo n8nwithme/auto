@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1842 580" width="1842" height="580">
+  <style>
+    .outline-text {
+      font-family: "ReviewCondensed", "Impact", "Arial Black", sans-serif;
+      font-weight: 900;
+      font-size: 230px;
+      fill: none;
+      stroke: #000000;
+      stroke-width: 12px;
+      stroke-linejoin: round;
+      text-anchor: middle;
+      letter-spacing: 10px;
+    }
+    .starburst {
+      fill: #000000;
+    }
+  </style>
+  <text x="921" y="240" class="outline-text">ĐỊA DANH THÁI NGUYÊN</text>
+  <text x="921" y="470" class="outline-text">PRE-ORDER 2026</text>
+  <path class="starburst" d="M1520 180 L1535 225 L1580 235 L1545 265 L1555 310 L1515 285 L1475 310 L1485 265 L1450 235 L1495 225 Z"/>
+  <path class="starburst" d="M320 280 L330 315 L365 322 L338 345 L345 380 L315 360 L285 380 L292 345 L265 322 L300 315 Z"/>
+</svg>

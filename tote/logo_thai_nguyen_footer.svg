@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1841 581" width="1841" height="581">
+  <style>
+    .tn-title {
+      font-family: "ReviewCondensed", "Impact", "Arial Black", sans-serif;
+      font-weight: 900;
+      font-size: 380px;
+      fill: #ffffff;
+      text-anchor: middle;
+      letter-spacing: 12px;
+    }
+    .tn-sub {
+      font-family: "Review", "Arial", sans-serif;
+      font-weight: 700;
+      font-size: 54px;
+      fill: #ffffff;
+      text-anchor: middle;
+      letter-spacing: 24px;
+      opacity: 0.9;
+    }
+  </style>
+  <text x="920" y="380" class="tn-title">THÁI NGUYÊN</text>
+  <text x="920" y="490" class="tn-sub">TỰ HÀO XỨ TRÀ • EST. 2026</text>
+</svg>
